@@ -1,50 +1,50 @@
-"use client";
+"use client"
 
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
   BACKGROUND_COLORS,
   MAX_COPIES,
   MIN_COPIES,
   PAPER_SIZES,
   PHOTO_SIZES,
-} from "@/lib/photo-config";
-import type { BackgroundOptionId } from "@/types/passport-photo";
+} from "@/lib/photo-config"
+import type { BackgroundOptionId } from "@/types/passport-photo"
 
 type PhotoSettingsProps = {
-  disabled?: boolean;
-  photoSizeId: string;
-  customWidthMm: number;
-  customHeightMm: number;
-  backgroundId: BackgroundOptionId;
-  customBackgroundColor: string;
-  copies: number;
-  paperSizeId: string;
-  gapMm: number;
-  marginMm: number;
-  onPhotoSizeIdChange: (id: string) => void;
-  onCustomWidthMmChange: (value: number) => void;
-  onCustomHeightMmChange: (value: number) => void;
-  onBackgroundIdChange: (id: BackgroundOptionId) => void;
-  onCustomBackgroundColorChange: (value: string) => void;
-  onCopiesChange: (value: number) => void;
-  onPaperSizeIdChange: (id: string) => void;
-  onGapMmChange: (value: number) => void;
-  onMarginMmChange: (value: number) => void;
-};
+  disabled?: boolean
+  photoSizeId: string
+  customWidthMm: number
+  customHeightMm: number
+  backgroundId: BackgroundOptionId
+  customBackgroundColor: string
+  copies: number
+  paperSizeId: string
+  gapMm: number
+  marginMm: number
+  onPhotoSizeIdChange: (id: string) => void
+  onCustomWidthMmChange: (value: number) => void
+  onCustomHeightMmChange: (value: number) => void
+  onBackgroundIdChange: (id: BackgroundOptionId) => void
+  onCustomBackgroundColorChange: (value: string) => void
+  onCopiesChange: (value: number) => void
+  onPaperSizeIdChange: (id: string) => void
+  onGapMmChange: (value: number) => void
+  onMarginMmChange: (value: number) => void
+}
 
 export function PhotoSettings({
   disabled,
@@ -78,7 +78,7 @@ export function PhotoSettings({
           <Select
             value={photoSizeId}
             onValueChange={(value) => {
-              if (value) onPhotoSizeIdChange(value);
+              if (value) onPhotoSizeIdChange(value)
             }}
             disabled={disabled}
           >
@@ -138,12 +138,8 @@ export function PhotoSettings({
             value={backgroundId}
             disabled={disabled}
             onValueChange={(value) => {
-              if (
-                value === "white" ||
-                value === "blue" ||
-                value === "custom"
-              ) {
-                onBackgroundIdChange(value);
+              if (value === "white" || value === "blue" || value === "custom") {
+                onBackgroundIdChange(value)
               }
             }}
             className="grid gap-2"
@@ -231,7 +227,7 @@ export function PhotoSettings({
             value={paperSizeId}
             disabled={disabled}
             onValueChange={(value) => {
-              if (value) onPaperSizeIdChange(value);
+              if (value) onPaperSizeIdChange(value)
             }}
           >
             <SelectTrigger id="paper-size" className="w-full">
@@ -281,5 +277,5 @@ export function PhotoSettings({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

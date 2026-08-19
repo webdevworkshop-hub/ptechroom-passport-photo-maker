@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 type PassportPreviewProps = {
-  passportPhotoUrl: string | null;
-  photoLabel: string;
-  backgroundColor: string;
-  widthPx: number;
-  heightPx: number;
-  onEdit: () => void;
-  disabled?: boolean;
-};
+  passportPhotoUrl: string | null
+  photoLabel: string
+  backgroundColor: string
+  widthPx: number
+  heightPx: number
+  onEdit: () => void
+  disabled?: boolean
+}
 
 export function PassportPreview({
   passportPhotoUrl,
@@ -62,5 +62,5 @@ export function PassportPreview({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

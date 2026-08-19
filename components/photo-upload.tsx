@@ -1,23 +1,26 @@
-"use client";
+"use client"
 
-import { useCallback, useRef, useState } from "react";
-import { Upload } from "lucide-react";
+import { useCallback, useRef, useState } from "react"
+import { Upload } from "lucide-react"
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { formatBytes } from "@/lib/image-utils";
-import type { ProcessingStatus, UploadedPhotoMeta } from "@/types/passport-photo";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { formatBytes } from "@/lib/image-utils"
+import type {
+  ProcessingStatus,
+  UploadedPhotoMeta,
+} from "@/types/passport-photo"
+import { cn } from "@/lib/utils"
 
 type PhotoUploadProps = {
-  disabled?: boolean;
-  status: ProcessingStatus;
-  statusMessage: string;
-  meta: UploadedPhotoMeta | null;
-  previewUrl: string | null;
-  onFileSelected: (file: File) => void;
-};
+  disabled?: boolean
+  status: ProcessingStatus
+  statusMessage: string
+  meta: UploadedPhotoMeta | null
+  previewUrl: string | null
+  onFileSelected: (file: File) => void
+}
 
 const STATUS_PROGRESS: Record<ProcessingStatus, number> = {
   idle: 0,
@@ -27,7 +30,7 @@ const STATUS_PROGRESS: Record<ProcessingStatus, number> = {
   "creating-sheet": 90,
   done: 100,
   error: 0,
-};
+}
 
 export function PhotoUpload({
   disabled,
@@ -37,23 +40,23 @@ export function PhotoUpload({
   previewUrl,
   onFileSelected,
 }: PhotoUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
-      const file = files?.[0];
-      if (!file) return;
-      onFileSelected(file);
+      const file = files?.[0]
+      if (!file) return
+      onFileSelected(file)
     },
-    [onFileSelected],
-  );
+    [onFileSelected]
+  )
 
   const isProcessing =
     status === "removing-background" ||
     status === "detecting-face" ||
     status === "creating-passport" ||
-    status === "creating-sheet";
+    status === "creating-sheet"
 
   return (
     <Card>
@@ -63,29 +66,29 @@ export function PhotoUpload({
       <CardContent className="space-y-4">
         <div
           className={cn(
-            "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed lg:px-6 lg:py-8 text-center transition-colors",
+            "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed text-center transition-colors lg:px-6 lg:py-8",
             isDragging
               ? "border-primary bg-muted/60"
               : "border-border bg-muted/20",
-            disabled && "opacity-60",
+            disabled && "opacity-60"
           )}
           onDragEnter={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
+            event.preventDefault()
+            setIsDragging(true)
           }}
           onDragOver={(event) => {
-            event.preventDefault();
-            setIsDragging(true);
+            event.preventDefault()
+            setIsDragging(true)
           }}
           onDragLeave={(event) => {
-            event.preventDefault();
-            setIsDragging(false);
+            event.preventDefault()
+            setIsDragging(false)
           }}
           onDrop={(event) => {
-            event.preventDefault();
-            setIsDragging(false);
-            if (disabled) return;
-            handleFiles(event.dataTransfer.files);
+            event.preventDefault()
+            setIsDragging(false)
+            if (disabled) return
+            handleFiles(event.dataTransfer.files)
           }}
         >
           <Upload className="size-8 text-muted-foreground" />
@@ -110,8 +113,8 @@ export function PhotoUpload({
             className="hidden"
             disabled={disabled}
             onChange={(event) => {
-              handleFiles(event.target.files);
-              event.target.value = "";
+              handleFiles(event.target.files)
+              event.target.value = ""
             }}
           />
         </div>
@@ -122,13 +125,15 @@ export function PhotoUpload({
               <p
                 className={cn(
                   "text-sm",
-                  status === "error" ? "text-destructive" : "text-foreground",
+                  status === "error" ? "text-destructive" : "text-foreground"
                 )}
               >
                 {statusMessage || "Ready"}
               </p>
               {isProcessing && (
-                <span className="text-xs text-muted-foreground">Processing</span>
+                <span className="text-xs text-muted-foreground">
+                  Processing
+                </span>
               )}
             </div>
             {isProcessing && (
@@ -138,7 +143,7 @@ export function PhotoUpload({
         )}
 
         {meta && (
-          <div className="grid gap-2 rounded-lg border p-3 text-sm grid-cols-2">
+          <div className="grid grid-cols-2 gap-2 rounded-lg border p-3 text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Filename</p>
               <p className="truncate font-medium">{meta.name}</p>
@@ -177,5 +182,5 @@ export function PhotoUpload({
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

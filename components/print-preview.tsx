@@ -1,17 +1,17 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { PrintSheetResult } from "@/types/passport-photo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import type { PrintSheetResult } from "@/types/passport-photo"
 
 type PrintPreviewProps = {
-  sheets: string[];
-  sheetInfo: PrintSheetResult | null;
-  paperLabel: string;
-  paperWidthPx: number;
-  paperHeightPx: number;
-  copies: number;
-  photoLabel: string;
-};
+  sheets: string[]
+  sheetInfo: PrintSheetResult | null
+  paperLabel: string
+  paperWidthPx: number
+  paperHeightPx: number
+  copies: number
+  photoLabel: string
+}
 
 export function PrintPreview({
   sheets,
@@ -25,7 +25,7 @@ export function PrintPreview({
   const fitWarning =
     sheetInfo && sheetInfo.maxPerSheet > 0 && copies > sheetInfo.maxPerSheet
       ? `Only ${sheetInfo.maxPerSheet} photos fit on this sheet. ${sheetInfo.sheetsNeeded} sheets required.`
-      : null;
+      : null
 
   return (
     <Card className="h-full">
@@ -82,5 +82,5 @@ export function PrintPreview({
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -1,21 +1,21 @@
-"use client";
+"use client"
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { removeBackground } from "rembg-webgpu";
+import { useEffect, useMemo, useRef, useState } from "react"
+import { removeBackground } from "rembg-webgpu"
 
-import { OutputActions } from "@/components/output-actions";
-import { PassportPreview } from "@/components/passport-preview";
+import { OutputActions } from "@/components/output-actions"
+import { PassportPreview } from "@/components/passport-preview"
 import {
   DEFAULT_CROP,
   PhotoEditorDialog,
-} from "@/components/photo-editor-dialog";
-import { PhotoSettings } from "@/components/photo-settings";
-import { PhotoUpload } from "@/components/photo-upload";
-import { PrintPreview } from "@/components/print-preview";
-import { createPassportPhoto } from "@/lib/create-passport-photo";
-import { createPrintSheet } from "@/lib/create-print-sheet";
-import { createPrintPdf, openPrintDialog } from "@/lib/export-print";
-import { getFaceDetector } from "@/lib/face-detector";
+} from "@/components/photo-editor-dialog"
+import { PhotoSettings } from "@/components/photo-settings"
+import { PhotoUpload } from "@/components/photo-upload"
+import { PrintPreview } from "@/components/print-preview"
+import { createPassportPhoto } from "@/lib/create-passport-photo"
+import { createPrintSheet } from "@/lib/create-print-sheet"
+import { createPrintPdf, openPrintDialog } from "@/lib/export-print"
+import { getFaceDetector } from "@/lib/face-detector"
 import {
   downloadBlob,
   downloadDataUrl,
@@ -24,7 +24,7 @@ import {
   maybeDownscaleImage,
   toUserFriendlyError,
   validateImageFile,
-} from "@/lib/image-utils";
+} from "@/lib/image-utils"
 import {
   DEFAULT_BACKGROUND,
   DEFAULT_COPIES,
@@ -37,7 +37,7 @@ import {
   mmToPx,
   resolveBackgroundColor,
   resolvePhotoDimensions,
-} from "@/lib/photo-config";
+} from "@/lib/photo-config"
 import type {
   BackgroundOptionId,
   CropAdjustments,
@@ -45,90 +45,90 @@ import type {
   PrintSheetResult,
   ProcessingStatus,
   UploadedPhotoMeta,
-} from "@/types/passport-photo";
+} from "@/types/passport-photo"
 
 export function PassportPhotoMaker() {
-  const [transparentUrl, setTransparentUrl] = useState<string | null>(null);
-  const [passportPhotoUrl, setPassportPhotoUrl] = useState<string | null>(null);
-  const [printSheets, setPrintSheets] = useState<string[]>([]);
-  const [sheetInfo, setSheetInfo] = useState<PrintSheetResult | null>(null);
-  const [faceBox, setFaceBox] = useState<FaceBox | null>(null);
-  const [meta, setMeta] = useState<UploadedPhotoMeta | null>(null);
+  const [transparentUrl, setTransparentUrl] = useState<string | null>(null)
+  const [passportPhotoUrl, setPassportPhotoUrl] = useState<string | null>(null)
+  const [printSheets, setPrintSheets] = useState<string[]>([])
+  const [sheetInfo, setSheetInfo] = useState<PrintSheetResult | null>(null)
+  const [faceBox, setFaceBox] = useState<FaceBox | null>(null)
+  const [meta, setMeta] = useState<UploadedPhotoMeta | null>(null)
 
-  const [photoSizeId, setPhotoSizeId] = useState(DEFAULT_PHOTO_SIZE_ID);
-  const [customWidthMm, setCustomWidthMm] = useState(35);
-  const [customHeightMm, setCustomHeightMm] = useState(45);
+  const [photoSizeId, setPhotoSizeId] = useState(DEFAULT_PHOTO_SIZE_ID)
+  const [customWidthMm, setCustomWidthMm] = useState(35)
+  const [customHeightMm, setCustomHeightMm] = useState(45)
   const [backgroundId, setBackgroundId] =
-    useState<BackgroundOptionId>(DEFAULT_BACKGROUND);
+    useState<BackgroundOptionId>(DEFAULT_BACKGROUND)
   const [customBackgroundColor, setCustomBackgroundColor] = useState<string>(
-    DEFAULT_CUSTOM_BACKGROUND,
-  );
-  const [copies, setCopies] = useState(DEFAULT_COPIES);
-  const [paperSizeId, setPaperSizeId] = useState(DEFAULT_PAPER_SIZE_ID);
-  const [gapMm, setGapMm] = useState(DEFAULT_GAP_MM);
-  const [marginMm, setMarginMm] = useState(DEFAULT_MARGIN_MM);
-  const [crop, setCrop] = useState<CropAdjustments>(DEFAULT_CROP);
+    DEFAULT_CUSTOM_BACKGROUND
+  )
+  const [copies, setCopies] = useState(DEFAULT_COPIES)
+  const [paperSizeId, setPaperSizeId] = useState(DEFAULT_PAPER_SIZE_ID)
+  const [gapMm, setGapMm] = useState(DEFAULT_GAP_MM)
+  const [marginMm, setMarginMm] = useState(DEFAULT_MARGIN_MM)
+  const [crop, setCrop] = useState<CropAdjustments>(DEFAULT_CROP)
 
-  const [status, setStatus] = useState<ProcessingStatus>("idle");
-  const [statusMessage, setStatusMessage] = useState("");
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [aiBusy, setAiBusy] = useState(false);
+  const [status, setStatus] = useState<ProcessingStatus>("idle")
+  const [statusMessage, setStatusMessage] = useState("")
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [aiBusy, setAiBusy] = useState(false)
 
-  const transparentUrlRef = useRef<string | null>(null);
-  const originalPreviewUrlRef = useRef<string | null>(null);
-  const processIdRef = useRef(0);
+  const transparentUrlRef = useRef<string | null>(null)
+  const originalPreviewUrlRef = useRef<string | null>(null)
+  const processIdRef = useRef(0)
 
   const photoDimensions = useMemo(
     () => resolvePhotoDimensions(photoSizeId, customWidthMm, customHeightMm),
-    [photoSizeId, customWidthMm, customHeightMm],
-  );
+    [photoSizeId, customWidthMm, customHeightMm]
+  )
 
-  const paper = useMemo(() => getPaperSizeById(paperSizeId), [paperSizeId]);
+  const paper = useMemo(() => getPaperSizeById(paperSizeId), [paperSizeId])
 
   const backgroundColor = useMemo(
     () => resolveBackgroundColor(backgroundId, customBackgroundColor),
-    [backgroundId, customBackgroundColor],
-  );
+    [backgroundId, customBackgroundColor]
+  )
 
   const revokeUrl = (url: string | null) => {
     if (url?.startsWith("blob:")) {
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url)
     }
-  };
+  }
 
   const resetOutputs = () => {
-    setPassportPhotoUrl(null);
-    setPrintSheets([]);
-    setSheetInfo(null);
-    setFaceBox(null);
-  };
+    setPassportPhotoUrl(null)
+    setPrintSheets([])
+    setSheetInfo(null)
+    setFaceBox(null)
+  }
 
   const handleFileSelected = async (file: File) => {
-    const validationError = validateImageFile(file);
+    const validationError = validateImageFile(file)
     if (validationError) {
-      setStatus("error");
-      setStatusMessage(validationError);
-      return;
+      setStatus("error")
+      setStatusMessage(validationError)
+      return
     }
 
-    const processId = ++processIdRef.current;
-    let inputUrl: string | null = null;
-    let preparedUrl: string | null = null;
+    const processId = ++processIdRef.current
+    let inputUrl: string | null = null
+    let preparedUrl: string | null = null
 
     try {
-      setAiBusy(true);
-      setStatus("removing-background");
-      setStatusMessage("Removing background...");
-      resetOutputs();
+      setAiBusy(true)
+      setStatus("removing-background")
+      setStatusMessage("Removing background...")
+      resetOutputs()
 
-      revokeUrl(transparentUrlRef.current);
-      revokeUrl(originalPreviewUrlRef.current);
-      transparentUrlRef.current = null;
-      originalPreviewUrlRef.current = null;
-      setTransparentUrl(null);
+      revokeUrl(transparentUrlRef.current)
+      revokeUrl(originalPreviewUrlRef.current)
+      transparentUrlRef.current = null
+      originalPreviewUrlRef.current = null
+      setTransparentUrl(null)
 
-      const sourceImage = await loadImageFromFile(file);
-      if (processId !== processIdRef.current) return;
+      const sourceImage = await loadImageFromFile(file)
+      if (processId !== processIdRef.current) return
 
       setMeta({
         name: file.name,
@@ -136,52 +136,52 @@ export function PassportPhotoMaker() {
         height: sourceImage.naturalHeight,
         sizeBytes: file.size,
         type: file.type || "image",
-      });
+      })
 
-      const prepared = await maybeDownscaleImage(sourceImage);
-      preparedUrl = URL.createObjectURL(prepared.blob);
-      originalPreviewUrlRef.current = preparedUrl;
-      inputUrl = preparedUrl;
-      const result = await removeBackground(inputUrl);
+      const prepared = await maybeDownscaleImage(sourceImage)
+      preparedUrl = URL.createObjectURL(prepared.blob)
+      originalPreviewUrlRef.current = preparedUrl
+      inputUrl = preparedUrl
+      const result = await removeBackground(inputUrl)
       if (processId !== processIdRef.current) {
         if (result.blobUrl?.startsWith("blob:")) {
-          URL.revokeObjectURL(result.blobUrl);
+          URL.revokeObjectURL(result.blobUrl)
         }
-        return;
+        return
       }
 
-      const nextTransparentUrl = result.blobUrl;
-      transparentUrlRef.current = nextTransparentUrl;
-      setTransparentUrl(nextTransparentUrl);
-      setCrop(DEFAULT_CROP);
+      const nextTransparentUrl = result.blobUrl
+      transparentUrlRef.current = nextTransparentUrl
+      setTransparentUrl(nextTransparentUrl)
+      setCrop(DEFAULT_CROP)
 
-      setStatus("detecting-face");
-      setStatusMessage("Detecting face...");
+      setStatus("detecting-face")
+      setStatusMessage("Detecting face...")
 
-      const processedImage = await loadImageFromUrl(nextTransparentUrl);
-      if (processId !== processIdRef.current) return;
+      const processedImage = await loadImageFromUrl(nextTransparentUrl)
+      if (processId !== processIdRef.current) return
 
-      const detector = await getFaceDetector();
-      const detection = detector.detect(processedImage);
-      const detections = detection.detections ?? [];
+      const detector = await getFaceDetector()
+      const detection = detector.detect(processedImage)
+      const detections = detection.detections ?? []
 
       if (detections.length === 0) {
         throw new Error(
-          "No face detected. Please upload a clear front-facing photo.",
-        );
+          "No face detected. Please upload a clear front-facing photo."
+        )
       }
 
       if (detections.length > 1) {
         throw new Error(
-          "Multiple faces detected. Please upload a photo containing one person.",
-        );
+          "Multiple faces detected. Please upload a photo containing one person."
+        )
       }
 
-      const box = detections[0]?.boundingBox;
+      const box = detections[0]?.boundingBox
       if (!box) {
         throw new Error(
-          "No face detected. Please upload a clear front-facing photo.",
-        );
+          "No face detected. Please upload a clear front-facing photo."
+        )
       }
 
       setFaceBox({
@@ -189,39 +189,39 @@ export function PassportPhotoMaker() {
         originY: box.originY,
         width: box.width,
         height: box.height,
-      });
+      })
 
-      setStatus("creating-passport");
-      setStatusMessage("Creating passport photo...");
+      setStatus("creating-passport")
+      setStatusMessage("Creating passport photo...")
     } catch (error) {
-      if (processId !== processIdRef.current) return;
-      console.error(error);
-      setStatus("error");
+      if (processId !== processIdRef.current) return
+      console.error(error)
+      setStatus("error")
       setStatusMessage(
         toUserFriendlyError(
           error,
-          "Failed to process image. Please try another photo.",
-        ),
-      );
-      resetOutputs();
+          "Failed to process image. Please try another photo."
+        )
+      )
+      resetOutputs()
     } finally {
       if (processId === processIdRef.current) {
-        setAiBusy(false);
+        setAiBusy(false)
       }
     }
-  };
+  }
 
   // Derived: regenerate passport photo when settings / crop change.
   // Does NOT rerun background removal.
   useEffect(() => {
-    if (!transparentUrl || !faceBox) return;
+    if (!transparentUrl || !faceBox) return
 
-    let cancelled = false;
+    let cancelled = false
 
     const regenerate = async () => {
       try {
-        const image = await loadImageFromUrl(transparentUrl);
-        if (cancelled) return;
+        const image = await loadImageFromUrl(transparentUrl)
+        if (cancelled) return
 
         const passport = createPassportPhoto(image, {
           widthPx: photoDimensions.widthPx,
@@ -231,33 +231,33 @@ export function PassportPhotoMaker() {
           zoom: crop.zoom,
           offsetX: crop.offsetX,
           offsetY: crop.offsetY,
-        });
+        })
 
-        if (cancelled) return;
-        setPassportPhotoUrl(passport);
+        if (cancelled) return
+        setPassportPhotoUrl(passport)
 
         if (!aiBusy) {
-          setStatus("creating-sheet");
-          setStatusMessage("Updating print sheet...");
+          setStatus("creating-sheet")
+          setStatusMessage("Updating print sheet...")
         }
       } catch (error) {
-        if (cancelled) return;
-        console.error(error);
-        setStatus("error");
+        if (cancelled) return
+        console.error(error)
+        setStatus("error")
         setStatusMessage(
           toUserFriendlyError(
             error,
-            "Failed to create passport photo. Please try again.",
-          ),
-        );
+            "Failed to create passport photo. Please try again."
+          )
+        )
       }
-    };
+    }
 
-    void regenerate();
+    void regenerate()
 
     return () => {
-      cancelled = true;
-    };
+      cancelled = true
+    }
   }, [
     transparentUrl,
     faceBox,
@@ -268,13 +268,13 @@ export function PassportPhotoMaker() {
     crop.offsetX,
     crop.offsetY,
     aiBusy,
-  ]);
+  ])
 
   // Derived: regenerate print sheet when passport / paper / copies / spacing change.
   useEffect(() => {
-    if (!passportPhotoUrl) return;
+    if (!passportPhotoUrl) return
 
-    let cancelled = false;
+    let cancelled = false
 
     const regenerate = async () => {
       try {
@@ -287,37 +287,37 @@ export function PassportPhotoMaker() {
           photoHeightPx: photoDimensions.heightPx,
           gapPx: mmToPx(gapMm),
           marginPx: mmToPx(marginMm),
-        });
+        })
 
-        if (cancelled) return;
-        setPrintSheets(result.sheets);
-        setSheetInfo(result);
-        setStatus("done");
+        if (cancelled) return
+        setPrintSheets(result.sheets)
+        setSheetInfo(result)
+        setStatus("done")
         setStatusMessage(
           result.sheetsNeeded > 1
             ? `Done · ${result.sheetsNeeded} sheets prepared`
-            : "Done",
-        );
+            : "Done"
+        )
       } catch (error) {
-        if (cancelled) return;
-        console.error(error);
-        setPrintSheets([]);
-        setSheetInfo(null);
-        setStatus("error");
+        if (cancelled) return
+        console.error(error)
+        setPrintSheets([])
+        setSheetInfo(null)
+        setStatus("error")
         setStatusMessage(
           toUserFriendlyError(
             error,
-            "Failed to create print sheet. Adjust size or spacing and try again.",
-          ),
-        );
+            "Failed to create print sheet. Adjust size or spacing and try again."
+          )
+        )
       }
-    };
+    }
 
-    void regenerate();
+    void regenerate()
 
     return () => {
-      cancelled = true;
-    };
+      cancelled = true
+    }
   }, [
     passportPhotoUrl,
     copies,
@@ -327,79 +327,78 @@ export function PassportPhotoMaker() {
     photoDimensions.heightPx,
     gapMm,
     marginMm,
-  ]);
+  ])
 
   useEffect(() => {
     return () => {
-      revokeUrl(transparentUrlRef.current);
-      revokeUrl(originalPreviewUrlRef.current);
-    };
-  }, []);
+      revokeUrl(transparentUrlRef.current)
+      revokeUrl(originalPreviewUrlRef.current)
+    }
+  }, [])
 
   const handleDownloadJpg = () => {
-    if (printSheets.length === 0) return;
+    if (printSheets.length === 0) return
     try {
       printSheets.forEach((sheet, index) => {
-        const suffix =
-          printSheets.length > 1 ? `-sheet-${index + 1}` : "";
-        downloadDataUrl(sheet, `passport-photos${suffix}.jpg`);
-      });
+        const suffix = printSheets.length > 1 ? `-sheet-${index + 1}` : ""
+        downloadDataUrl(sheet, `passport-photos${suffix}.jpg`)
+      })
     } catch (error) {
-      console.error(error);
-      setStatus("error");
-      setStatusMessage("Failed to download JPG. Please try again.");
+      console.error(error)
+      setStatus("error")
+      setStatusMessage("Failed to download JPG. Please try again.")
     }
-  };
+  }
 
   const handleDownloadPdf = async () => {
-    if (printSheets.length === 0) return;
+    if (printSheets.length === 0) return
     try {
-      const blob = await createPrintPdf(printSheets, paper);
-      downloadBlob(blob, "passport-photos.pdf");
+      const blob = await createPrintPdf(printSheets, paper)
+      downloadBlob(blob, "passport-photos.pdf")
     } catch (error) {
-      console.error(error);
-      setStatus("error");
-      setStatusMessage("Failed to create PDF. Please try again.");
+      console.error(error)
+      setStatus("error")
+      setStatusMessage("Failed to create PDF. Please try again.")
     }
-  };
+  }
 
   const handlePrint = () => {
-    if (printSheets.length === 0) return;
+    if (printSheets.length === 0) return
     try {
-      openPrintDialog(printSheets, paper);
+      openPrintDialog(printSheets, paper)
     } catch (error) {
-      console.error(error);
-      setStatus("error");
+      console.error(error)
+      setStatus("error")
       setStatusMessage(
         toUserFriendlyError(
           error,
-          "Unable to open print dialog. Please try again.",
-        ),
-      );
+          "Unable to open print dialog. Please try again."
+        )
+      )
     }
-  };
+  }
 
-  const settingsDisabled = aiBusy;
-  const hasOutput = printSheets.length > 0;
+  const settingsDisabled = aiBusy
+  const hasOutput = printSheets.length > 0
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-10">
-      <div className="flex justify-between items-center flex-wrap gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <header className="space-y-1">
-          <h1 className="text-left lg:text-3xl font-bold tracking-tight">
+          <h1 className="text-left font-bold tracking-tight lg:text-3xl">
             Passport Photo Maker
           </h1>
-          <p className="text-muted-foreground text-sm lg:text-base">
+          <p className="text-sm text-muted-foreground lg:text-base">
             Upload once · AI removes the background · adjust settings and print
             without reprocessing.
           </p>
         </header>
         <OutputActions
-            disabled={!hasOutput || aiBusy}
-            onDownloadJpg={handleDownloadJpg}
-            onDownloadPdf={handleDownloadPdf}
-            onPrint={handlePrint}
-          />
+          disabled={!hasOutput || aiBusy}
+          onDownloadJpg={handleDownloadJpg}
+          onDownloadPdf={handleDownloadPdf}
+          onPrint={handlePrint}
+        />
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
@@ -433,11 +432,10 @@ export function PassportPhotoMaker() {
             onGapMmChange={setGapMm}
             onMarginMmChange={setMarginMm}
           />
-          
         </div>
 
         <div className="space-y-4 lg:space-y-6">
-          <div className="grid gap-4 lg:gap-6 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2 lg:gap-6">
             <PassportPreview
               passportPhotoUrl={passportPhotoUrl}
               photoLabel={photoDimensions.label}
@@ -465,10 +463,12 @@ export function PassportPhotoMaker() {
         onOpenChange={setEditorOpen}
         transparentUrl={transparentUrl}
         backgroundColor={backgroundColor}
+        faceBox={faceBox}
+        widthPx={photoDimensions.widthPx}
+        heightPx={photoDimensions.heightPx}
         crop={crop}
-        aspectRatio={photoDimensions.widthPx / photoDimensions.heightPx}
         onApply={setCrop}
       />
     </div>
-  );
+  )
 }

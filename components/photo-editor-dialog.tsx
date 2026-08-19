@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,77 +10,164 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-import type { CropAdjustments } from "@/types/passport-photo";
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { Slider } from "@/components/ui/slider"
+import { createPassportPhoto } from "@/lib/create-passport-photo"
+import { loadImageFromUrl } from "@/lib/image-utils"
+import type { CropAdjustments, FaceBox } from "@/types/passport-photo"
 
 const DEFAULT_CROP: CropAdjustments = {
   zoom: 1,
   offsetX: 0,
   offsetY: 0,
-};
+}
 
 type PhotoEditorDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  transparentUrl: string | null;
-  backgroundColor: string;
-  crop: CropAdjustments;
-  aspectRatio: number;
-  onApply: (crop: CropAdjustments) => void;
-};
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  transparentUrl: string | null
+  backgroundColor: string
+  faceBox: FaceBox | null
+  widthPx: number
+  heightPx: number
+  crop: CropAdjustments
+  onApply: (crop: CropAdjustments) => void
+}
 
 export function PhotoEditorDialog({
   open,
   onOpenChange,
   transparentUrl,
   backgroundColor,
+  faceBox,
+  widthPx,
+  heightPx,
   crop,
-  aspectRatio,
   onApply,
 }: PhotoEditorDialogProps) {
-  const [draft, setDraft] = useState<CropAdjustments>(crop);
+  const [draft, setDraft] = useState<CropAdjustments>(crop)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const imageRef = useRef<HTMLImageElement | null>(null)
 
-  useEffect(() => {
-    if (open) {
-      setDraft(crop);
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setDraft(crop)
+      setPreviewUrl(null)
+      imageRef.current = null
     }
-  }, [open, crop]);
+    onOpenChange(nextOpen)
+  }
 
-  const previewTransform = {
-    transform: `translate(${draft.offsetX * 18}%, ${draft.offsetY * 18}%) scale(${draft.zoom})`,
-  };
+  // Load the transparent subject once while the dialog is open.
+  useEffect(() => {
+    if (!open || !transparentUrl) return
+
+    let cancelled = false
+
+    void loadImageFromUrl(transparentUrl)
+      .then((image) => {
+        if (!cancelled) {
+          imageRef.current = image
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        if (!cancelled) {
+          imageRef.current = null
+          setPreviewUrl(null)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, transparentUrl])
+
+  // Live passport preview from the same crop pipeline used by the main preview.
+  useEffect(() => {
+    if (!open || !faceBox || widthPx <= 0 || heightPx <= 0) return
+
+    let cancelled = false
+    let frame = 0
+
+    const render = async () => {
+      try {
+        let image = imageRef.current
+        if (!image && transparentUrl) {
+          image = await loadImageFromUrl(transparentUrl)
+          if (cancelled) return
+          imageRef.current = image
+        }
+        if (!image) return
+
+        const nextPreview = createPassportPhoto(image, {
+          widthPx,
+          heightPx,
+          backgroundColor,
+          faceBox,
+          zoom: draft.zoom,
+          offsetX: draft.offsetX,
+          offsetY: draft.offsetY,
+        })
+
+        if (!cancelled) {
+          setPreviewUrl(nextPreview)
+        }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    frame = window.requestAnimationFrame(() => {
+      void render()
+    })
+
+    return () => {
+      cancelled = true
+      window.cancelAnimationFrame(frame)
+    }
+  }, [
+    open,
+    transparentUrl,
+    faceBox,
+    widthPx,
+    heightPx,
+    backgroundColor,
+    draft.zoom,
+    draft.offsetX,
+    draft.offsetY,
+  ])
+
+  const aspectRatio = widthPx / heightPx
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg" showCloseButton>
         <DialogHeader>
           <DialogTitle>Edit Photo</DialogTitle>
           <DialogDescription>
-            Adjust zoom and position. Changes apply to the passport crop only —
+            Adjust zoom and position. This preview is the actual passport crop —
             background removal is not run again.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
           <div
-            className="mx-auto flex h-64 w-full max-w-[220px] items-center justify-center overflow-hidden rounded-lg border"
-            style={{
-              backgroundColor,
-              aspectRatio,
-            }}
+            className="mx-auto flex h-64 w-full max-w-[220px] items-center justify-center overflow-hidden rounded-lg border bg-muted/30"
+            style={{ aspectRatio }}
           >
-            {transparentUrl ? (
+            {previewUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={transparentUrl}
-                alt="Editable subject"
-                className="h-full w-full object-cover transition-transform"
-                style={previewTransform}
+                src={previewUrl}
+                alt="Passport photo preview"
+                className="h-full w-full object-contain"
               />
             ) : (
-              <p className="text-sm text-muted-foreground">No photo loaded</p>
+              <p className="text-sm text-muted-foreground">
+                Preparing passport preview…
+              </p>
             )}
           </div>
 
@@ -97,9 +184,9 @@ export function PhotoEditorDialog({
               step={0.01}
               value={[draft.zoom]}
               onValueChange={(value) => {
-                const zoom = Array.isArray(value) ? value[0] : value;
+                const zoom = Array.isArray(value) ? value[0] : value
                 if (typeof zoom === "number") {
-                  setDraft((current) => ({ ...current, zoom }));
+                  setDraft((current) => ({ ...current, zoom }))
                 }
               }}
             />
@@ -118,9 +205,9 @@ export function PhotoEditorDialog({
               step={0.01}
               value={[draft.offsetX]}
               onValueChange={(value) => {
-                const offsetX = Array.isArray(value) ? value[0] : value;
+                const offsetX = Array.isArray(value) ? value[0] : value
                 if (typeof offsetX === "number") {
-                  setDraft((current) => ({ ...current, offsetX }));
+                  setDraft((current) => ({ ...current, offsetX }))
                 }
               }}
             />
@@ -139,9 +226,9 @@ export function PhotoEditorDialog({
               step={0.01}
               value={[draft.offsetY]}
               onValueChange={(value) => {
-                const offsetY = Array.isArray(value) ? value[0] : value;
+                const offsetY = Array.isArray(value) ? value[0] : value
                 if (typeof offsetY === "number") {
-                  setDraft((current) => ({ ...current, offsetY }));
+                  setDraft((current) => ({ ...current, offsetY }))
                 }
               }}
             />
@@ -167,8 +254,8 @@ export function PhotoEditorDialog({
             <Button
               type="button"
               onClick={() => {
-                onApply(draft);
-                onOpenChange(false);
+                onApply(draft)
+                onOpenChange(false)
               }}
             >
               Apply
@@ -177,7 +264,7 @@ export function PhotoEditorDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
-export { DEFAULT_CROP };
+export { DEFAULT_CROP }

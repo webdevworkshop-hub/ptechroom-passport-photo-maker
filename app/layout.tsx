@@ -2,10 +2,10 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
-import { Metadata } from "next";
+import { cn } from "@/lib/utils"
+import { Metadata } from "next"
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -13,7 +13,8 @@ const fontMono = Geist_Mono({
 })
 export const metadata: Metadata = {
   title: " PTechRoom - Easy Passport Photo Creation",
-  description: "Upload once · AI removes the background · adjust settings and print without reprocessing.",
+  description:
+    "Upload once · AI removes the background · adjust settings and print without reprocessing.",
 }
 
 export default function RootLayout({
@@ -25,7 +26,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+      className={cn(
+        "antialiased",
+        fontMono.variable,
+        "font-sans",
+        geist.variable
+      )}
     >
       <body>
         <ThemeProvider>{children}</ThemeProvider>

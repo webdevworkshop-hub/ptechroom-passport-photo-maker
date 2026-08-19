@@ -1,72 +1,72 @@
-"use client";
+"use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react"
 
 interface WhiteBackgroundImageProps {
-  src: string;
-  onResult?: (url: string) => void;
+  src: string
+  onResult?: (url: string) => void
 }
 
 export function WhiteBackgroundImage({
   src,
   onResult,
 }: WhiteBackgroundImageProps) {
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!src) return;
+    if (!src) return
 
-    let outputUrl: string | null = null;
+    let outputUrl: string | null = null
 
     const processImage = async () => {
-      const image = new Image();
+      const image = new Image()
 
       image.onload = () => {
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement("canvas")
 
-        canvas.width = image.naturalWidth;
-        canvas.height = image.naturalHeight;
+        canvas.width = image.naturalWidth
+        canvas.height = image.naturalHeight
 
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d")
 
-        if (!ctx) return;
+        if (!ctx) return
 
         // White background
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
         // Put transparent person over white background
-        ctx.drawImage(image, 0, 0);
+        ctx.drawImage(image, 0, 0)
 
         // Convert to PNG
         canvas.toBlob((blob) => {
-          if (!blob) return;
+          if (!blob) return
 
-          outputUrl = URL.createObjectURL(blob);
+          outputUrl = URL.createObjectURL(blob)
 
-          setResult(outputUrl);
-          onResult?.(outputUrl);
-        }, "image/png");
-      };
+          setResult(outputUrl)
+          onResult?.(outputUrl)
+        }, "image/png")
+      }
 
-      image.src = src;
-    };
+      image.src = src
+    }
 
-    processImage();
+    processImage()
 
     return () => {
       if (outputUrl) {
-        URL.revokeObjectURL(outputUrl);
+        URL.revokeObjectURL(outputUrl)
       }
-    };
-  }, [src, onResult]);
+    }
+  }, [src, onResult])
 
   if (!result) {
     return (
       <div className="flex h-96 items-center justify-center">
         Preparing image...
       </div>
-    );
+    )
   }
 
   return (
@@ -75,5 +75,5 @@ export function WhiteBackgroundImage({
       alt="Passport photo with white background"
       className="max-h-[500px] max-w-full object-contain"
     />
-  );
+  )
 }

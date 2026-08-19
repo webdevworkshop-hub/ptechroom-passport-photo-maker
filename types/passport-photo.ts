@@ -1,41 +1,41 @@
 export type FaceBox = {
-  originX: number;
-  originY: number;
-  width: number;
-  height: number;
-};
+  originX: number
+  originY: number
+  width: number
+  height: number
+}
 
 export type PhotoSize = {
-  id: string;
-  label: string;
-  widthMm: number;
-  heightMm: number;
-};
+  id: string
+  label: string
+  widthMm: number
+  heightMm: number
+}
 
 export type PaperSize = {
-  id: string;
-  label: string;
-  widthInches: number;
-  heightInches: number;
-  widthPx: number;
-  heightPx: number;
-};
+  id: string
+  label: string
+  widthInches: number
+  heightInches: number
+  widthPx: number
+  heightPx: number
+}
 
-export type BackgroundOptionId = "white" | "blue" | "custom";
+export type BackgroundOptionId = "white" | "blue" | "custom"
 
 export type CropAdjustments = {
-  zoom: number;
-  offsetX: number;
-  offsetY: number;
-};
+  zoom: number
+  offsetX: number
+  offsetY: number
+}
 
 export type UploadedPhotoMeta = {
-  name: string;
-  width: number;
-  height: number;
-  sizeBytes: number;
-  type: string;
-};
+  name: string
+  width: number
+  height: number
+  sizeBytes: number
+  type: string
+}
 
 export type ProcessingStatus =
   | "idle"
@@ -44,14 +44,14 @@ export type ProcessingStatus =
   | "creating-passport"
   | "creating-sheet"
   | "done"
-  | "error";
+  | "error"
 
 export type PrintSheetResult = {
-  sheets: string[];
-  maxPerSheet: number;
-  columns: number;
-  rows: number;
-  sheetsNeeded: number;
-  photosRequested: number;
-  photosPlaced: number;
-};
+  sheets: string[]
+  maxPerSheet: number
+  columns: number
+  rows: number
+  sheetsNeeded: number
+  photosRequested: number
+  photosPlaced: number
+}
