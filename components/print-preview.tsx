@@ -52,12 +52,12 @@ export function PrintPreview({
         </div>
 
         {fitWarning && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          <div className="rounded-xl border border-amber-300/80 bg-amber-50 px-3 py-2 text-sm text-amber-900">
             {fitWarning}
           </div>
         )}
 
-        <div className="flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-lg bg-muted/40 lg:p-4">
+        <div className="bg-gradient-surface flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-2xl lg:p-4">
           {sheets.length > 0 ? (
             sheets.map((sheet, index) => (
               <div key={`${index}-${sheet.slice(0, 32)}`} className="w-full">
@@ -70,7 +70,7 @@ export function PrintPreview({
                 <img
                   src={sheet}
                   alt={`Print sheet ${index + 1}`}
-                  className="mx-auto w-full max-w-[420px] shadow-sm"
+                  className="mx-auto w-full max-w-[420px] rounded-md shadow-md"
                 />
               </div>
             ))

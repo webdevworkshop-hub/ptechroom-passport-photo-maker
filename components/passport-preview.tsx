@@ -36,13 +36,13 @@ export function PassportPreview({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex min-h-[320px] items-center justify-center rounded-lg bg-muted/40 p-6">
+        <div className="bg-gradient-surface flex min-h-[320px] items-center justify-center rounded-2xl p-6">
           {passportPhotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={passportPhotoUrl}
               alt="Passport photo preview"
-              className="max-h-[420px] shadow-sm"
+              className="max-h-[420px] rounded-md shadow-md"
               style={{
                 aspectRatio: `${widthPx} / ${heightPx}`,
                 backgroundColor,

@@ -25,10 +25,7 @@ export function OutputActions({
 }: OutputActionsProps) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        disabled={disabled}
-        render={<Button size="lg" />}
-      >
+      <DropdownMenuTrigger disabled={disabled} render={<Button size="lg" />}>
         <Download data-icon="inline-start" />
         Export
         <ChevronDown data-icon="inline-end" />

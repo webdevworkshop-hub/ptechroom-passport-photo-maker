@@ -154,7 +154,7 @@ export function PhotoEditorDialog({
 
         <div className="space-y-5">
           <div
-            className="mx-auto flex h-64 w-full max-w-[220px] items-center justify-center overflow-hidden rounded-lg border bg-muted/30"
+            className="bg-gradient-surface mx-auto flex h-64 w-full max-w-[220px] items-center justify-center overflow-hidden rounded-2xl border"
             style={{ aspectRatio }}
           >
             {previewUrl ? (
@@ -258,7 +258,7 @@ export function PhotoEditorDialog({
                 onOpenChange(false)
               }}
             >
-              Apply
+              Apply Changes
             </Button>
           </div>
         </DialogFooter>

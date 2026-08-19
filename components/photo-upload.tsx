@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useRef, useState } from "react"
-import { Upload } from "lucide-react"
+import { CloudUpload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -66,10 +66,10 @@ export function PhotoUpload({
       <CardContent className="space-y-4">
         <div
           className={cn(
-            "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed text-center transition-colors lg:px-6 lg:py-8",
+            "flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed py-3 text-center transition-colors lg:px-6 lg:py-10",
             isDragging
-              ? "border-primary bg-muted/60"
-              : "border-border bg-muted/20",
+              ? "bg-gradient-surface border-primary ring-2 ring-primary/25"
+              : "bg-gradient-surface border-primary/25",
             disabled && "opacity-60"
           )}
           onDragEnter={(event) => {
@@ -91,11 +91,13 @@ export function PhotoUpload({
             handleFiles(event.dataTransfer.files)
           }}
         >
-          <Upload className="size-8 text-muted-foreground" />
+          <div className="bg-gradient-primary flex size-12 items-center justify-center rounded-full text-primary-foreground shadow-sm shadow-primary/20">
+            <CloudUpload className="size-6" />
+          </div>
           <div>
-            <p className="text-sm font-medium">Drop a customer photo here</p>
+            <p className="text-sm font-semibold">Drag & drop your photo here</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              JPG, PNG, or WEBP · up to 25 MB
+              Supports JPG, PNG, or WEBP · up to 25 MB
             </p>
           </div>
           <Button
@@ -120,7 +122,7 @@ export function PhotoUpload({
         </div>
 
         {(isProcessing || statusMessage) && (
-          <div className="space-y-2 rounded-lg border bg-muted/30 p-3">
+          <div className="space-y-2 rounded-xl border bg-secondary/50 p-3">
             <div className="flex items-center justify-between gap-3">
               <p
                 className={cn(
@@ -143,7 +145,7 @@ export function PhotoUpload({
         )}
 
         {meta && (
-          <div className="grid grid-cols-2 gap-2 rounded-lg border p-3 text-sm">
+          <div className="grid grid-cols-2 gap-2 rounded-xl border bg-background p-3 text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Filename</p>
               <p className="truncate font-medium">{meta.name}</p>
@@ -168,7 +170,7 @@ export function PhotoUpload({
         )}
 
         {previewUrl && (
-          <div className="rounded-lg border bg-[linear-gradient(45deg,#eee_25%,transparent_25%),linear-gradient(-45deg,#eee_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#eee_75%),linear-gradient(-45deg,transparent_75%,#eee_75%)] bg-size-[16px_16px] bg-position-[0_0,0_8px,8px_-8px,-8px_0] p-3">
+          <div className="rounded-xl border bg-[linear-gradient(45deg,#eee_25%,transparent_25%),linear-gradient(-45deg,#eee_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#eee_75%),linear-gradient(-45deg,transparent_75%,#eee_75%)] bg-size-[16px_16px] bg-position-[0_0,0_8px,8px_-8px,-8px_0] p-3">
             <p className="mb-2 text-xs font-medium text-muted-foreground">
               Processed (transparent subject)
             </p>

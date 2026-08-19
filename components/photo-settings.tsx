@@ -144,7 +144,7 @@ export function PhotoSettings({
             }}
             className="grid gap-2"
           >
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-3 py-2.5 transition-colors hover:bg-secondary/60">
               <RadioGroupItem value="white" />
               <span
                 className="size-4 rounded-sm border"
@@ -152,7 +152,7 @@ export function PhotoSettings({
               />
               <span className="text-sm">White</span>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-3 py-2.5 transition-colors hover:bg-secondary/60">
               <RadioGroupItem value="blue" />
               <span
                 className="size-4 rounded-sm border"
@@ -160,7 +160,7 @@ export function PhotoSettings({
               />
               <span className="text-sm">Blue</span>
             </label>
-            <label className="flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-3 py-2.5 transition-colors hover:bg-secondary/60">
               <RadioGroupItem value="custom" />
               <span className="text-sm">Custom</span>
             </label>

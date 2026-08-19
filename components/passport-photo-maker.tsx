@@ -1,5 +1,6 @@
 "use client"
 
+import { Camera } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { removeBackground } from "rembg-webgpu"
 
@@ -382,16 +383,21 @@ export function PassportPhotoMaker() {
   const hasOutput = printSheets.length > 0
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-10">
+    <div className="mx-auto max-w-7xl space-y-8 p-6 md:p-10">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <header className="space-y-1">
-          <h1 className="text-left font-bold tracking-tight lg:text-3xl">
-            Passport Photo Maker
-          </h1>
-          <p className="text-sm text-muted-foreground lg:text-base">
-            Upload once · AI removes the background · adjust settings and print
-            without reprocessing.
-          </p>
+        <header className="flex items-center gap-3">
+          <div className="bg-gradient-primary flex size-11 shrink-0 items-center justify-center rounded-2xl text-primary-foreground shadow-md shadow-primary/25">
+            <Camera className="size-5" />
+          </div>
+          <div className="space-y-0.5">
+            <h1 className="bg-linear-to-r from-foreground via-foreground to-primary bg-clip-text text-left text-xl font-bold tracking-tight text-transparent lg:text-3xl">
+              Passport Photo Maker
+            </h1>
+            <p className="text-sm text-muted-foreground lg:text-base">
+              Upload once · AI removes the background · adjust settings and
+              print without reprocessing.
+            </p>
+          </div>
         </header>
         <OutputActions
           disabled={!hasOutput || aiBusy}
