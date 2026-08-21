@@ -57,7 +57,7 @@ export function PrintPreview({
           </div>
         )}
 
-        <div className="bg-gradient-surface flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-2xl lg:p-4">
+        <div className="bg-gradient-surface flex min-h-[320px] flex-col items-center justify-center gap-4 rounded-2xl p-4">
           {sheets.length > 0 ? (
             sheets.map((sheet, index) => (
               <div key={`${index}-${sheet.slice(0, 32)}`} className="w-full">
